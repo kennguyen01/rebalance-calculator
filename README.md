@@ -2,4 +2,4 @@
 
 Simple portfolio rebalance calculator using [yfinance](https://github.com/ranaroussi/yfinance).
 
-[Changelog](CHANGELOG.md)
+[Changelog](https://github.com/kennguyen01/rebalance-calculator/releases)
