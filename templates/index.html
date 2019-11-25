@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <section class="card card-body">
+        {% with message = get_flashed_messages() %}
+            {% if message %}
+        <p class="card-title"><strong>{{ message[0] }}</strong></p>
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('info') }}" method="POST">
+            <input type="text" class="form-control form-control-lg" name="user-tickers" id="user-tickers" placeholder="AMZN, GOOG, FB,..." autofocus required>
+            <button type="submit" class="btn btn-lg btn-outline-primary mt-3">Get Info</button>
+        </form>
+    </section>
+{% endblock %}
