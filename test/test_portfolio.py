@@ -80,19 +80,42 @@ class TestAccessTickerData(unittest.TestCase):
     def setUp(self):
         self.p = Portfolio()
 
-    def test_invalid_ticker(self):
+    def test_one_invalid(self):
         self.p.build_portfolio("zzzzz")
-        self.p.access_ticker_data()
+        self.p.set_ticker_data()
         invalid = ["ZZZZZ"]
-        self.assertEqual(self.p.get_invalid(), invalid, "Expected empty list")
+        self.assertEqual(invalid, self.p.get_invalid())
 
-    def test_correct_tickers(self):
-        self.p.build_portfolio("amzn, spy, vtsmx")
+    def test_multiple_invalids(self):
+        self.p.build_portfolio("algaksd, !#%021348, lhganl")
+        self.p.set_ticker_data()
+        invalids = ['ALGAKSD', 'LHGANL']
+        self.assertEqual(invalids, self.p.get_invalid())
+
+    def test_expected_keys(self):
+        self.p.build_portfolio("amzn, best")
+        self.p.set_ticker_data()
         expected_keys = ["Ticker", "Name", "Type", "Price"]
-        self.p.access_ticker_data()
+        self.p.set_ticker_data()
         for d in self.p.get_portfolio():
             k = list(d.keys())
-            self.assertEqual(k, expected_keys, "Expected key not found")
+            self.assertEqual(expected_keys, k)
+
+    def test_one_ticker(self):
+        self.p.build_portfolio("tsla")
+        self.p.set_ticker_data()
+        for d in self.p.get_portfolio():
+            for k, v in d.items():
+                self.assertIsNotNone(k)
+                self.assertIsNotNone(v)
+
+    def test_multiple_tickers(self):
+        self.p.build_portfolio("tsla, best, ge")
+        self.p.set_ticker_data()
+        for d in self.p.get_portfolio():
+            for k, v in d.items():
+                self.assertIsNotNone(k)
+                self.assertIsNotNone(v)
 
 
 class TestUserInputs(unittest.TestCase):

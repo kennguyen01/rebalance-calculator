@@ -53,7 +53,7 @@ class Portfolio:
     def request_ticker_data(self, ticker):
         """
         ticker: uppercase ticker string
-        Requests ticker data with yfinance and appends ticker with no info to self.invalid
+        Requests ticker data with yfinance and appends ticker that raises KeyError
         Returns dictionary containing ticker data
         """
         info = yf.Ticker(ticker).info
@@ -65,9 +65,13 @@ class Portfolio:
                 "Price": info["regularMarketPrice"]}
 
     def set_ticker_data(self):
-        for d in self.portfolio:
-            data = self.request_ticker_data(d["Ticker"])
-            d.update(data)
+        for d in self.portfolio.copy():
+            try:
+                data = self.request_ticker_data(d["Ticker"])
+            except KeyError:
+                self.portfolio.remove(d)
+            else:
+                d.update(data)
 
     def set_ticker_balance(self, balances):
         balances = [float(balance) for balance in balances]
