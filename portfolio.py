@@ -50,23 +50,24 @@ class Portfolio:
     def get_total(self):
         return self.total
 
-    def access_ticker_data(self):
+    def request_ticker_data(self, ticker):
         """
-        Retrieves data from yfinance and updates ticker dict
-        Returns first invalid ticker
+        ticker: uppercase ticker string
+        Requests ticker data with yfinance and appends ticker with no info to self.invalid
+        Returns dictionary containing ticker data
         """
-        # yfinance data keys
-        n = "shortName"
-        t = "quoteType"
-        p = "regularMarketPrice"
+        info = yf.Ticker(ticker).info
+        if not info:
+            self.invalid.append(ticker)
 
+        return {"Name": info["shortName"],
+                "Type": info["quoteType"],
+                "Price": info["regularMarketPrice"]}
+
+    def set_ticker_data(self):
         for d in self.portfolio:
-            ticker = d["Ticker"]
-            info = yf.Ticker(ticker).info
-            if not info:
-                self.invalid.append(ticker)
-                continue
-            d.update({"Name": info[n], "Type": info[t], "Price": info[p]})
+            data = self.request_ticker_data(d["Ticker"])
+            d.update(data)
 
     def set_ticker_balance(self, balances):
         balances = [float(balance) for balance in balances]
