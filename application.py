@@ -15,6 +15,7 @@ user_portfolio = Portfolio()
 @app.route("/ira-rebalance", methods=["GET", "POST"])
 def index():
     user_portfolio.reset_portfolio()
+    user_portfolio.reset_total()
     return render_template("index.html")
 
 

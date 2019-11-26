@@ -34,14 +34,14 @@ class TestNewPortfolio(unittest.TestCase):
         self.assertEqual(t, p)
 
     def test_random_symbols(self):
-        self.p.build_portfolio("!\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~")
+        self.p.build_portfolio("!\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~0123456789")
         p = self.p.get_portfolio()
         self.assertEqual([], p)
 
     def test_combinations(self):
         t = [{'Ticker': 'ABC'}, {'Ticker': 'XYZ'}]
 
-        self.p.build_portfolio('abc, xyz, ;<=>?@')
+        self.p.build_portfolio("abc, xyz, ;<=>?@, !@%, ^@#4590")
         p = self.p.get_portfolio()
         self.assertEqual(t, p)
 
@@ -52,11 +52,14 @@ class TestPortfolioResets(unittest.TestCase):
         self.p = Portfolio()
 
     def tearDown(self):
-        pass
+        del self.p
 
     def test_reset_portfolio(self):
         self.p.reset_portfolio()
         self.assertEqual(self.p.get_portfolio(), [], "Expected empty list")
+
+    def test_reset_total(self):
+        pass
 
 
 class TestAccessTickerData(unittest.TestCase):
