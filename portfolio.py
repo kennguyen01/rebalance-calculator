@@ -73,6 +73,12 @@ class Portfolio:
         for i, d in enumerate(self.portfolio):
             d["Balance"] = round(balances[i], 2)
 
+    def set_invalid(self, invalids):
+        assert type(invalids) == list
+
+        for invalid in invalids:
+            self.invalid.append(invalid)
+
     def set_target_allocation(self, allocations):
         # Checks if total allocations adds up to 100%
         allocations = [float(allocation) for allocation in allocations]

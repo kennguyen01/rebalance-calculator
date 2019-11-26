@@ -46,7 +46,7 @@ class TestNewPortfolio(unittest.TestCase):
         self.assertEqual(t, p)
 
 
-class TestPortfolioResets(unittest.TestCase):
+class TestResetPortfolio(unittest.TestCase):
 
     def setUp(self):
         self.p = Portfolio()
@@ -54,12 +54,25 @@ class TestPortfolioResets(unittest.TestCase):
     def tearDown(self):
         del self.p
 
-    def test_reset_portfolio(self):
+    def test_one_ticker(self):
+        self.p.build_portfolio("vti")
         self.p.reset_portfolio()
-        self.assertEqual(self.p.get_portfolio(), [], "Expected empty list")
+        self.assertEqual([], self.p.get_portfolio())
 
-    def test_reset_total(self):
-        pass
+    def test_multiple_tickers(self):
+        self.p.build_portfolio("a, axp, c")
+        self.p.reset_portfolio()
+        self.assertEqual([], self.p.get_portfolio())
+
+    def test_one_invalid(self):
+        self.p.set_invalid(["eeeeee"])
+        self.p.reset_portfolio()
+        self.assertEqual([], self.p.get_portfolio())
+
+    def test_multiple_invalids(self):
+        self.p.set_invalid(["alsdrhgla", "027043o15h", "!#%#$asdgfhjka"])
+        self.p.reset_portfolio()
+        self.assertEqual([], self.p.get_portfolio())
 
 
 class TestAccessTickerData(unittest.TestCase):
