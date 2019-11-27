@@ -1,9 +1,27 @@
 #!/usr/bin/env python3
 
 import copy
+import random
 import unittest
 
 from portfolio import Portfolio
+
+
+def generate_portfolio_inputs(tickers):
+    """
+    tickers: list of ticker str
+    Helper function to generates random balance and allocation for each ticker
+    Returns tuple of both lists
+    """
+    allocations = []
+    balances = []
+    for i in range(len(tickers)):
+        a = random.random()
+        b = round(random.uniform(1.0, 10000.00), 2)
+        allocations.append(a)
+        balances.append(str(b))
+    allocations = [round(i / sum(allocations) * 100, 4) for i in allocations]
+    return allocations, balances
 
 
 class TestNewPortfolio(unittest.TestCase):
@@ -16,40 +34,44 @@ class TestNewPortfolio(unittest.TestCase):
 
     def test_no_ticker(self):
         self.p.build_portfolio("")
-        p = self.p.get_portfolio()
-        self.assertEqual([], p)
+        test = []
+        result = self.p.get_portfolio()
+        self.assertEqual(test, result)
 
     def test_one_ticker(self):
-        t = [{"Ticker": "A"}]
-
+        test = [{"Ticker": "A"}]
         self.p.build_portfolio('a')
-        p = self.p.get_portfolio()
-        self.assertEqual(t, p)
+
+        result = self.p.get_portfolio()
+        self.assertEqual(test, result)
 
     def test_multiple_tickers(self):
-        t = [{'Ticker': 'A'}, {'Ticker': 'BC'}, {'Ticker': 'DEF'}]
-
+        test = [{'Ticker': 'A'}, {'Ticker': 'BC'}, {'Ticker': 'DEF'}]
         self.p.build_portfolio("a, bc, def")
-        p = self.p.get_portfolio()
-        self.assertEqual(t, p)
+
+        result = self.p.get_portfolio()
+        self.assertEqual(test, result)
 
     def test_random_symbols(self):
         self.p.build_portfolio("!\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~0123456789")
-        p = self.p.get_portfolio()
-        self.assertEqual([], p)
+
+        test = []
+        result = self.p.get_portfolio()
+        self.assertEqual(test, result)
 
     def test_combinations(self):
-        t = [{'Ticker': 'ABC'}, {'Ticker': 'XYZ'}]
-
+        test = [{'Ticker': 'ABC'}, {'Ticker': 'XYZ'}]
         self.p.build_portfolio("abc, xyz, ;<=>?@, !@%, ^@#4590")
-        p = self.p.get_portfolio()
-        self.assertEqual(t, p)
+
+        result = self.p.get_portfolio()
+        self.assertEqual(test, result)
 
 
 class TestResetPortfolio(unittest.TestCase):
 
     def setUp(self):
         self.p = Portfolio()
+        self.test = []
 
     def tearDown(self):
         del self.p
@@ -57,24 +79,32 @@ class TestResetPortfolio(unittest.TestCase):
     def test_one_ticker(self):
         self.p.build_portfolio("vti")
         self.p.reset_portfolio()
-        self.assertEqual([], self.p.get_portfolio())
+
+        result = self.p.get_portfolio()
+        self.assertEqual(self.test, result)
 
     def test_multiple_tickers(self):
         self.p.build_portfolio("a, axp, c")
         self.p.reset_portfolio()
-        self.assertEqual([], self.p.get_portfolio())
+
+        result = self.p.get_portfolio()
+        self.assertEqual(self.test, result)
 
     def test_one_invalid(self):
         self.p.build_portfolio("eeeeee")
         self.p.set_ticker_data()
         self.p.reset_portfolio()
-        self.assertEqual([], self.p.get_portfolio())
+
+        result = self.p.get_portfolio()
+        self.assertEqual(self.test, result)
 
     def test_multiple_invalids(self):
         self.p.build_portfolio("alsdrhgla, 027043o15h, !#%#$asdgfhjka")
         self.p.set_ticker_data()
         self.p.reset_portfolio()
-        self.assertEqual([], self.p.get_portfolio())
+
+        result = self.p.get_portfolio()
+        self.assertEqual(self.test, result)
 
 
 class TestAccessTickerData(unittest.TestCase):
@@ -82,26 +112,34 @@ class TestAccessTickerData(unittest.TestCase):
     def setUp(self):
         self.p = Portfolio()
 
+    def tearDown(self):
+        del self.p
+
     def test_one_invalid(self):
         self.p.build_portfolio("zzzzz")
         self.p.set_ticker_data()
-        invalid = ["ZZZZZ"]
-        self.assertEqual(invalid, self.p.get_invalid())
+
+        test = ["ZZZZZ"]
+        result = self.p.get_invalid()
+        self.assertEqual(test, result)
 
     def test_multiple_invalids(self):
         self.p.build_portfolio("algaksd, !#%021348, lhganl")
         self.p.set_ticker_data()
-        invalids = ['ALGAKSD', 'LHGANL']
-        self.assertEqual(invalids, self.p.get_invalid())
+
+        test = ['ALGAKSD', 'LHGANL']
+        result = self.p.get_invalid()
+        self.assertEqual(test, result)
 
     def test_expected_keys(self):
         self.p.build_portfolio("amzn, best")
         self.p.set_ticker_data()
-        expected_keys = ["Ticker", "Name", "Type", "Price"]
+
+        test = ["Ticker", "Name", "Type", "Price"]
         self.p.set_ticker_data()
         for d in self.p.get_portfolio():
-            k = list(d.keys())
-            self.assertEqual(expected_keys, k)
+            result = list(d.keys())
+            self.assertEqual(test, result)
 
     def test_one_ticker(self):
         self.p.build_portfolio("tsla")
@@ -124,8 +162,11 @@ class TestUserInputs(unittest.TestCase):
 
     def setUp(self):
         self.p = Portfolio()
-        self.p.build_portfolio("amzn, spy, vtsmx")
-        self.p.access_ticker_data()
+        self.p.build_portfolio("jnj, bac, baba")
+        self.p.set_ticker_data()
+
+    def tearDown(self):
+        del self.p
 
     def test_ticker_balance(self):
         balances = ["2354.44", "633.89", "1539.44"]
@@ -133,7 +174,9 @@ class TestUserInputs(unittest.TestCase):
 
         p = self.p.get_portfolio()
         for i, d in enumerate(p):
-            self.assertEqual(d["Balance"], round(float(balances[i]), 2), "Incorrect ticker balance")
+            test = round(float(balances[i]), 2)
+            result = d["Balance"]
+            self.assertEqual(test, result)
 
     def test_correct_target_allocation(self):
         allocations = ["55.25", "10", "34.75"]
@@ -141,47 +184,55 @@ class TestUserInputs(unittest.TestCase):
 
         p = self.p.get_portfolio()
         for i, d in enumerate(p):
-            self.assertEqual(d["Target"], round(float(allocations[i]) / 100, 4), "Incorrect target allocation")
+            test = round(float(allocations[i]) / 100, 4)
+            result = d["Target"]
+            self.assertEqual(test, result)
 
     def test_incorrect_target_allocation(self):
         allocations_1 = ["1", "2", "3"]
-        n = self.p.set_target_allocation(allocations_1)
-        self.assertEqual(n, False, 'Expected False')
+        result = self.p.set_target_allocation(allocations_1)
+        self.assertFalse(result)
 
         allocations_2 = ["101", "102", "103"]
         m = self.p.set_target_allocation(allocations_2)
-        self.assertEqual(m, False, 'Expected False')
+        self.assertFalse(result)
 
 
 class TestPortfolioCalculations(unittest.TestCase):
 
     def setUp(self):
         self.p = Portfolio()
-        self.p.build_portfolio("dis, v, msft")
-        self.p.access_ticker_data()
+        self.p.build_portfolio("dis, v, msft, f")
+        self.p.set_ticker_data()
+        self.allocations, self.balances = generate_portfolio_inputs(self.p.get_portfolio())
 
-        balances = ["1620.82", "3156.32", "3753.47"]
-        allocations = ["25", "45", "30"]
-
-        self.p.set_ticker_balance(balances)
-        self.p.set_target_allocation(allocations)
+        self.p.set_ticker_balance(self.balances)
+        self.p.set_target_allocation(self.allocations)
         self.p.set_total_balance()
-
         self.p.calculate_data()
 
+    def tearDown(self):
+        del self.p
+        del self.allocations
+        del self.balances
+
     def test_calculate_total(self):
-        total = 8530.61
-        self.assertEqual(total, self.p.get_total(), 'Total balance incorrect')
+        test = sum([float(i) for i in self.balances])
+        result = self.p.get_total()
+        self.assertEqual(test, result)
 
     def test_calculate_current_allocations(self):
-        current = [.19, .37, .44]
         for i, d in enumerate(self.p.get_portfolio()):
-            self.assertEqual(d["Current"], current[i], 'Current allocation incorrect')
+            test = round(d["Balance"] / self.p.get_total(), 4)
+            result = d["Current"]
+            self.assertEqual(test, result)
 
     def test_calculate_balance_difference(self):
-        difference = [511.84, 682.45, -1194.29]
         for i, d in enumerate(self.p.get_portfolio()):
-            self.assertEqual(d["BalanceDifference"], difference[i], 'Balance difference incorrect')
+            difference = d["Target"] - d["Current"]
+            test = round(difference * self.p.get_total(), 2)
+            result = d["BalanceDifference"]
+            self.assertAlmostEqual(test, result)
 
 
 class TestRebalance(unittest.TestCase):

@@ -79,10 +79,10 @@ class Portfolio:
             d["Balance"] = round(balances[i], 2)
 
     def set_target_allocation(self, allocations):
-        # Checks if total allocations adds up to 100%
+        # Checks if total allocations deviates within 1%
         allocations = [float(allocation) for allocation in allocations]
-        print(allocations)
-        if sum(allocations) != 100.0:
+        total_sum = sum(allocations)
+        if total_sum < 99.0 or total_sum > 101.0:
             return False
 
         for i, d in enumerate(self.portfolio):
