@@ -53,7 +53,7 @@ class TestNewPortfolio(unittest.TestCase):
         self.assertEqual(test, result)
 
     def test_random_symbols(self):
-        self.p.build_portfolio("!\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~0123456789")
+        self.p.build_portfolio("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~0123456789")
 
         test = []
         result = self.p.get_portfolio()
