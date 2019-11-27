@@ -65,12 +65,14 @@ class TestResetPortfolio(unittest.TestCase):
         self.assertEqual([], self.p.get_portfolio())
 
     def test_one_invalid(self):
-        self.p.set_invalid(["eeeeee"])
+        self.p.build_portfolio("eeeeee")
+        self.p.set_ticker_data()
         self.p.reset_portfolio()
         self.assertEqual([], self.p.get_portfolio())
 
     def test_multiple_invalids(self):
-        self.p.set_invalid(["alsdrhgla", "027043o15h", "!#%#$asdgfhjka"])
+        self.p.build_portfolio("alsdrhgla, 027043o15h, !#%#$asdgfhjka")
+        self.p.set_ticker_data()
         self.p.reset_portfolio()
         self.assertEqual([], self.p.get_portfolio())
 
