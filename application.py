@@ -12,24 +12,24 @@ app.secret_key = secret_key
 user_portfolio = Portfolio()
 
 
-@app.route("/ira-rebalance", methods=["GET", "POST"])
+@app.route("/rebalance-calculator", methods=["GET", "POST"])
 def index():
     user_portfolio.reset_portfolio()
     user_portfolio.reset_total()
     return render_template("index.html")
 
 
-@app.route("/ira-rebalance/about", methods=["GET"])
+@app.route("/rebalance-calculator/about", methods=["GET"])
 def about():
     return render_template("about.html")
 
 
-@app.route("/ira-rebalance/instructions", methods=["GET"])
+@app.route("/rebalance-calculator/instructions", methods=["GET"])
 def instructions():
     return render_template("instructions.html")
 
 
-@app.route("/ira-rebalance/info", methods=["GET", "POST"])
+@app.route("/rebalance-calculator/info", methods=["GET", "POST"])
 def info():
     """
     Receives string of tickers entered by user and build a portfolio
@@ -39,7 +39,7 @@ def info():
         user_inputs = request.form.get("user-tickers")
         user_portfolio.build_portfolio(user_inputs)
 
-    user_portfolio.access_ticker_data()
+    user_portfolio.set_ticker_data()
 
     # Checks if user enters any invalid ticker
     invalid = user_portfolio.get_invalid()
@@ -54,7 +54,7 @@ def info():
     return render_template("info.html", portfolio=portfolio)
 
 
-@app.route("/ira-rebalance/result", methods=["POST"])
+@app.route("/rebalance-calculator/result", methods=["POST"])
 def result():
     """
     Calculates optimal rebalanced portfolio given desired allocations
