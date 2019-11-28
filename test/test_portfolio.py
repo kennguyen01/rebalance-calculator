@@ -15,8 +15,8 @@ with open("s&p500.csv", "r") as f:
 
 
 def generate_tickers_string():
-    """Returns a string containing n tickers where 1 <= n <= 10"""
-    tickers = [random.choice(TICKERS) for _ in range(10)]
+    """Returns a string containing n tickers where 1 <= n <= 20"""
+    tickers = [random.choice(TICKERS) for _ in range(random.randint(1, 20))]
     return ", ".join(tickers)
 
 
@@ -29,7 +29,7 @@ def generate_portfolio_inputs(tickers):
     balances = []
     for i in range(len(tickers)):
         a = random.random()
-        b = round(random.uniform(1.0, 10000.00), 2)
+        b = round(random.uniform(1.0, 10000.0), 2)
         allocations.append(a)
         balances.append(str(b))
     allocations = [round(i / sum(allocations) * 100, 4) for i in allocations]
@@ -174,30 +174,30 @@ class TestUserInputs(unittest.TestCase):
 
     def setUp(self):
         self.p = Portfolio()
-        self.p.build_portfolio("jnj, bac, baba")
+        self.p.build_portfolio(generate_tickers_string())
         self.p.set_ticker_data()
+
+        self.allocations, self.balances = generate_portfolio_inputs(self.p.get_portfolio())
 
     def tearDown(self):
         del self.p
 
-    def test_ticker_balance(self):
-        balances = ["2354.44", "633.89", "1539.44"]
-        self.p.set_ticker_balance(balances)
+    def test_correct_target_allocation(self):
+        self.p.set_target_allocation(self.allocations)
 
         p = self.p.get_portfolio()
         for i, d in enumerate(p):
-            test = round(float(balances[i]), 2)
-            result = d["Balance"]
+            test = round(float(self.allocations[i]) / 100, 4)
+            result = d["Target"]
             self.assertEqual(test, result)
 
-    def test_correct_target_allocation(self):
-        allocations = ["55.25", "10", "34.75"]
-        self.p.set_target_allocation(allocations)
+    def test_ticker_balance(self):
+        self.p.set_ticker_balance(self.balances)
 
         p = self.p.get_portfolio()
         for i, d in enumerate(p):
-            test = round(float(allocations[i]) / 100, 4)
-            result = d["Target"]
+            test = round(float(self.balances[i]), 2)
+            result = d["Balance"]
             self.assertEqual(test, result)
 
     def test_incorrect_target_allocation(self):
@@ -214,7 +214,7 @@ class TestPortfolioCalculations(unittest.TestCase):
 
     def setUp(self):
         self.p = Portfolio()
-        self.p.build_portfolio("dis, v, msft, f")
+        self.p.build_portfolio(generate_tickers_string())
         self.p.set_ticker_data()
         self.allocations, self.balances = generate_portfolio_inputs(self.p.get_portfolio())
 
@@ -251,17 +251,16 @@ class TestRebalance(unittest.TestCase):
 
     def setUp(self):
         self.p = Portfolio()
-        self.p.build_portfolio("aapl, vti, axp, fssnx, ko")
-        self.p.access_ticker_data()
+        self.p.build_portfolio(generate_tickers_string())
+        self.p.set_ticker_data()
 
-        balances = ["3062.67", "5290.07", "7517.47", "3897.95", "8074.32"]
-        allocations = ["15", "30", "15", "15", "25"]
-
-        self.p.set_ticker_balance(balances)
-        self.p.set_target_allocation(allocations)
+        self.allocations, self.balances = generate_portfolio_inputs(self.p.get_portfolio())
+        self.p.set_ticker_balance(self.balances)
+        self.p.set_target_allocation(self.allocations)
 
     def test_rebalance_with_multiple_contributions(self):
-        contributions = [n for n in range(0, 7001, 200)]
+        contributions = [round(random.uniform(0.0, 7000.0), 2) for _ in range(random.randint(1, 20))]
+        print(contributions)
         for contribution in contributions:
             # Default portfolio before rebalance
             default = copy.deepcopy(self.p)
@@ -272,8 +271,14 @@ class TestRebalance(unittest.TestCase):
             for d in default.get_portfolio():
                 new_balance = d["Balance"] + d["BalanceDifference"]
                 new_allocation = new_balance / default.get_total()
-                self.assertEqual(d["NewBalance"], round(new_balance, 2), "New balance incorrect")
-                self.assertEqual(d["NewAllocation"], round(new_allocation, 2), "New Allocation incorrect")
+
+                test_balance = round(new_balance, 2)
+                result_balance = d["NewBalance"]
+                self.assertEqual(test_balance, result_balance)
+
+                test_allocation = round(new_allocation, 4)
+                result_allocation = d["NewAllocation"]
+                self.assertEqual(test_allocation, result_allocation)
 
 
 if __name__ == "__main__":
