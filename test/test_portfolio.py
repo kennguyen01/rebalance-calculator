@@ -1,17 +1,29 @@
 #!/usr/bin/env python3
 
 import copy
+import csv
 import random
 import unittest
 
 from portfolio import Portfolio
 
+TICKERS = []
+with open("s&p500.csv", "r") as f:
+    reader = csv.reader(f)
+    for row in reader:
+        TICKERS.append(row[0])
+
+
+def generate_tickers_string():
+    """Returns a string containing n tickers where 1 <= n <= 10"""
+    tickers = [random.choice(TICKERS) for _ in range(10)]
+    return ", ".join(tickers)
+
 
 def generate_portfolio_inputs(tickers):
     """
     tickers: list of ticker str
-    Helper function to generates random balance and allocation for each ticker
-    Returns tuple of both lists
+    Returns tuple of list for random balance and target allocation
     """
     allocations = []
     balances = []
@@ -77,14 +89,14 @@ class TestResetPortfolio(unittest.TestCase):
         del self.p
 
     def test_one_ticker(self):
-        self.p.build_portfolio("vti")
+        self.p.build_portfolio(random.choice(TICKERS))
         self.p.reset_portfolio()
 
         result = self.p.get_portfolio()
         self.assertEqual(self.test, result)
 
     def test_multiple_tickers(self):
-        self.p.build_portfolio("a, axp, c")
+        self.p.build_portfolio(generate_tickers_string())
         self.p.reset_portfolio()
 
         result = self.p.get_portfolio()
@@ -132,7 +144,7 @@ class TestAccessTickerData(unittest.TestCase):
         self.assertEqual(test, result)
 
     def test_expected_keys(self):
-        self.p.build_portfolio("amzn, best")
+        self.p.build_portfolio(generate_tickers_string())
         self.p.set_ticker_data()
 
         test = ["Ticker", "Name", "Type", "Price"]
@@ -150,7 +162,7 @@ class TestAccessTickerData(unittest.TestCase):
                 self.assertIsNotNone(v)
 
     def test_multiple_tickers(self):
-        self.p.build_portfolio("tsla, best, ge")
+        self.p.build_portfolio(generate_tickers_string())
         self.p.set_ticker_data()
         for d in self.p.get_portfolio():
             for k, v in d.items():
@@ -194,7 +206,7 @@ class TestUserInputs(unittest.TestCase):
         self.assertFalse(result)
 
         allocations_2 = ["101", "102", "103"]
-        m = self.p.set_target_allocation(allocations_2)
+        result = self.p.set_target_allocation(allocations_2)
         self.assertFalse(result)
 
 
